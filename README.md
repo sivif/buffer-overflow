@@ -21,8 +21,8 @@ As time ticks down, the assembly line continuously moves faster. Make too many m
 ## ⚙️ Game Mechanics
 
 ### 🛠️ Sorting Manifest
-* **🔵 HARDWARE:** Circuit boards, microchips, and processors ➔ Deposit into the **Blue Hopper**.
-* **🟢 SOFTWARE:** CDs, floppy disks, and data storage ➔ Deposit into the **Green Hopper**.
+* **🟢 HARDWARE:** Circuit boards, microchips, and processors ➔ Deposit into the **Blue Hopper**.
+* **🔵 SOFTWARE:** CDs, floppy disks, and data storage ➔ Deposit into the **Green Hopper**.
 * **🔴 E-WASTE:** Batteries, old monitors, and power cells ➔ Deposit into the **Red Hopper**.
 
 ### 🔥 Overdrive: Fever Mode
