@@ -1,220 +1,168 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
-		<title>Buffer Overflow</title>
-		<style>
-html, body, #canvas {
-	margin: 0;
-	padding: 0;
-	border: 0;
-}
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+	<title>Buffer Overflow</title>
+	<style>
+		/* 🛠️ 1. BASE CANVAS STYLING & SLEEK BLACK BACKGROUND */
+		body {
+			margin: 0;
+			padding: 0;
+			background-color: #0d0d11; /* Sleek dark-grid background */
+			color: #ffffff;
+			font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+			overflow: hidden;
+			width: 100vw;
+			height: 100vh;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
 
-body {
-	color: white;
-	background-color: black;
-	overflow: hidden;
-	touch-action: none;
-}
+		#canvas {
+			display: block;
+			width: 100%;
+			height: 100%;
+			position: absolute;
+			top: 0;
+			left: 0;
+			z-index: 1;
+		}
 
-#canvas {
-	display: block;
-}
+		#canvas:focus {
+			outline: none;
+		}
 
-#canvas:focus {
-	outline: none;
-}
+		/* 🛠️ 2. CUSTOM LOADING OVERLAY CONTAINER */
+		#loading-container {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background-color: #09090b; /* Pure velvet black boot overlay */
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			z-index: 10;
+			transition: opacity 0.4s ease-out;
+		}
 
-#status, #status-splash, #status-progress {
-	position: absolute;
-	left: 0;
-	right: 0;
-}
+		/* 🛠️ 3. LOADING TRACKER WITH PROGRESS-TRACKING GIF */
+		.loader-wrapper {
+			position: relative;
+			width: 280px; /* Width matching the progress layout bar */
+			display: flex;
+			flex-direction: column;
+			align-items: flex-start;
+		}
 
-#status, #status-splash {
-	top: 0;
-	bottom: 0;
-}
+		/* THE PROGRESS GIF CONTAINER */
+		#loading-gif {
+			width: 32px;  /* Adjust size based on your specific GIF dimensions */
+			height: 38px;
+			position: absolute;
+			bottom: 32px; /* Sits cleanly on top of the loading bar */
+			left: 0%;    /* Modified live via JavaScript script below */
+			transform: translateX(-50%); /* Centers the asset exactly on the progress line */
+			image-rendering: pixelated; /* Keeps pixel-art loops super crisp */
+			pointer-events: none;
+		}
 
-#status {
-	background-color: #242424;
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
-	visibility: hidden;
-}
+		/* THE SLEEK CUSTOM METRIC PROGRESS BAR */
+		progress {
+			-webkit-appearance: none;
+			appearance: none;
+			width: 100%;
+			height: 6px; /* Thin, minimalist profile bar design */
+			border: none;
+			background-color: #1c1c24; /* Loading bar track gutter background */
+			border-radius: 10px;
+			overflow: visible; /* Allows the runner indicator boundary logic to pass */
+		}
 
-#status-splash {
-	max-height: 100%;
-	max-width: 100%;
-	margin: auto;
-}
+		/* Color detailing for modern browsers (Chrome, Edge, Safari, Opera) */
+		progress::-webkit-progress-bar {
+			background-color: #1c1c24;
+			border-radius: 10px;
+		}
+		progress::-webkit-progress-value {
+			background-color: #ff4a4a; /* Sleek arcade accent tracking line (Neon Red) */
+			border-radius: 10px;
+			transition: width 0.1s ease-out;
+		}
 
-#status-splash.show-image--false {
-	display: none;
-}
+		/* Color detailing for Firefox */
+		progress::-moz-progress-bar {
+			background-color: #ff4a4a;
+			border-radius: 10px;
+		}
 
-#status-splash.fullsize--true {
-	height: 100%;
-	width: 100%;
-	object-fit: contain;
-}
-
-#status-splash.use-filter--false {
-	image-rendering: pixelated;
-}
-
-#status-progress, #status-notice {
-	display: none;
-}
-
-#status-progress {
-	bottom: 10%;
-	width: 50%;
-	margin: 0 auto;
-}
-
-#status-notice {
-	background-color: #5b3943;
-	border-radius: 0.5rem;
-	border: 1px solid #9b3943;
-	color: #e0e0e0;
-	font-family: 'Noto Sans', 'Droid Sans', Arial, sans-serif;
-	line-height: 1.3;
-	margin: 0 2rem;
-	overflow: hidden;
-	padding: 1rem;
-	text-align: center;
-	z-index: 1;
-}
-		</style>
-		<link id="-gd-engine-icon" rel="icon" type="image/png" href="index.icon.png" />
+		#loading-text {
+			font-size: 11px;
+			text-transform: uppercase;
+			letter-spacing: 0.15em;
+			color: #636370;
+			margin-top: 12px;
+			align-self: center;
+		}
+	</style>
+	<link id="-gd-engine-icon" rel="icon" type="image/png" href="index.icon.png" />
 <link rel="apple-touch-icon" href="index.apple-touch-icon.png"/>
 
-	</head>
-	<body>
-		<canvas id="canvas">
-			Your browser does not support the canvas tag.
-		</canvas>
+</head>
+<body>
+	<canvas id="canvas">HTML5 canvas interface support is required to run this execution application.</canvas>
 
-		<noscript>
-			Your browser does not support JavaScript.
-		</noscript>
-
-		<div id="status">
-			<img id="status-splash" class="show-image--true fullsize--true use-filter--false" src="index.png" alt="">
-			<progress id="status-progress"></progress>
-			<div id="status-notice"></div>
+	<div id="loading-container">
+		<div class="loader-wrapper">
+			<img id="loading-gif" src="loading_runner.gif" alt="Loading..." />
+			
+			<progress id="progress" value="0" max="100"></progress>
+			
+			<div id="loading-text">Initializing Engine...</div>
 		</div>
+	</div>
 
-		<script src="index.js"></script>
-		<script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":3211440,"index.wasm":35754592},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
-const GODOT_THREADS_ENABLED = false;
-const engine = new Engine(GODOT_CONFIG);
+	<script>
+		const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":4791808,"index.wasm":35754592},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+		const engine = new Godot(GODOT_CONFIG);
 
-(function () {
-	const statusOverlay = document.getElementById('status');
-	const statusProgress = document.getElementById('status-progress');
-	const statusNotice = document.getElementById('status-notice');
+		const loadingContainer = document.getElementById('loading-container');
+		const progressBar = document.getElementById('progress');
+		const loadingText = document.getElementById('loading-text');
+		const loadingGif = document.getElementById('loading-gif');
 
-	let initializing = true;
-	let statusMode = '';
-
-	function setStatusMode(mode) {
-		if (statusMode === mode || !initializing) {
-			return;
-		}
-		if (mode === 'hidden') {
-			statusOverlay.remove();
-			initializing = false;
-			return;
-		}
-		statusOverlay.style.visibility = 'visible';
-		statusProgress.style.display = mode === 'progress' ? 'block' : 'none';
-		statusNotice.style.display = mode === 'notice' ? 'block' : 'none';
-		statusMode = mode;
-	}
-
-	function setStatusNotice(text) {
-		while (statusNotice.lastChild) {
-			statusNotice.removeChild(statusNotice.lastChild);
-		}
-		const lines = text.split('\n');
-		lines.forEach((line) => {
-			statusNotice.appendChild(document.createTextNode(line));
-			statusNotice.appendChild(document.createElement('br'));
-		});
-	}
-
-	function displayFailureNotice(err) {
-		console.error(err);
-		if (err instanceof Error) {
-			setStatusNotice(err.message);
-		} else if (typeof err === 'string') {
-			setStatusNotice(err);
-		} else {
-			setStatusNotice('An unknown error occurred.');
-		}
-		setStatusMode('notice');
-		initializing = false;
-	}
-
-	const missing = Engine.getMissingFeatures({
-		threads: GODOT_THREADS_ENABLED,
-	});
-
-	if (missing.length !== 0) {
-		if (GODOT_CONFIG['serviceWorker'] && GODOT_CONFIG['ensureCrossOriginIsolationHeaders'] && 'serviceWorker' in navigator) {
-			let serviceWorkerRegistrationPromise;
-			try {
-				serviceWorkerRegistrationPromise = navigator.serviceWorker.getRegistration();
-			} catch (err) {
-				serviceWorkerRegistrationPromise = Promise.reject(new Error('Service worker registration failed.'));
-			}
-			// There's a chance that installing the service worker would fix the issue
-			Promise.race([
-				serviceWorkerRegistrationPromise.then((registration) => {
-					if (registration != null) {
-						return Promise.reject(new Error('Service worker already exists.'));
-					}
-					return registration;
-				}).then(() => engine.installServiceWorker()),
-				// For some reason, `getRegistration()` can stall
-				new Promise((resolve) => {
-					setTimeout(() => resolve(), 2000);
-				}),
-			]).then(() => {
-				// Reload if there was no error.
-				window.location.reload();
-			}).catch((err) => {
-				console.error('Error while registering service worker:', err);
-			});
-		} else {
-			// Display the message as usual
-			const missingMsg = 'Error\nThe following features required to run Godot projects on the Web are missing:\n';
-			displayFailureNotice(missingMsg + missing.join('\n'));
-		}
-	} else {
-		setStatusMode('progress');
+		// 🛠️ 4. INTERCEPT ENGINE WEB PACK DATA BYTES PACKETS
 		engine.startGame({
 			'onProgress': function (current, total) {
-				if (current > 0 && total > 0) {
-					statusProgress.value = current;
-					statusProgress.max = total;
+				if (total > 0) {
+					const percentage = (current / total) * 100;
+					
+					// Update standard numerical progress layout values
+					progressBar.value = percentage;
+					loadingText.innerText = `Downloading Data: ${Math.floor(percentage)}%`;
+					
+					// ✨ MAGIC: Move the GIF along the X-Axis dynamically to match progress!
+					loadingGif.style.left = `${percentage}%`;
 				} else {
-					statusProgress.removeAttribute('value');
-					statusProgress.removeAttribute('max');
+					loadingText.innerText = "Processing system segments...";
 				}
-			},
+			}
 		}).then(() => {
-			setStatusMode('hidden');
-		}, displayFailureNotice);
-	}
-}());
-		</script>
-	</body>
+			// Fade out and remove custom wrapper window once active game scene loops run
+			loadingContainer.style.opacity = '0';
+			setTimeout(() => {
+				loadingContainer.remove();
+			}, 400);
+		}).catch((err) => {
+			loadingText.innerText = "An execution setup layout error has occurred.";
+			loadingText.style.color = "#ff4a4a";
+			console.error(err);
+		});
+	</script>
+</body>
 </html>
 
