@@ -127,42 +127,38 @@
 	</div>
 
 	<script>
-		const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":4791808,"index.wasm":35754592},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
-		const engine = new Godot(GODOT_CONFIG);
+	// 🟢 The modern safe initialization block for Godot 4
+	const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":4791920,"index.wasm":35754592},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+	const engine = new Engine(GODOT_CONFIG); // Changed 'Godot' to 'Engine'
 
-		const loadingContainer = document.getElementById('loading-container');
-		const progressBar = document.getElementById('progress');
-		const loadingText = document.getElementById('loading-text');
-		const loadingGif = document.getElementById('loading-gif');
+	const loadingContainer = document.getElementById('loading-container');
+	const progressBar = document.getElementById('progress');
+	const loadingText = document.getElementById('loading-text');
+	const loadingGif = document.getElementById('loading-gif');
 
-		// 🛠️ 4. INTERCEPT ENGINE WEB PACK DATA BYTES PACKETS
-		engine.startGame({
-			'onProgress': function (current, total) {
-				if (total > 0) {
-					const percentage = (current / total) * 100;
-					
-					// Update standard numerical progress layout values
-					progressBar.value = percentage;
-					loadingText.innerText = `Downloading Data: ${Math.floor(percentage)}%`;
-					
-					// ✨ MAGIC: Move the GIF along the X-Axis dynamically to match progress!
+	engine.startGame({
+		'onProgress': function (current, total) {
+			if (total > 0) {
+				const percentage = (current / total) * 100;
+				progressBar.value = percentage;
+				loadingText.innerText = `Downloading Data: ${Math.floor(percentage)}%`;
+				
+				if (loadingGif) {
 					loadingGif.style.left = `${percentage}%`;
-				} else {
-					loadingText.innerText = "Processing system segments...";
 				}
+			} else {
+				loadingText.innerText = "Processing system segments...";
 			}
-		}).then(() => {
-			// Fade out and remove custom wrapper window once active game scene loops run
-			loadingContainer.style.opacity = '0';
-			setTimeout(() => {
-				loadingContainer.remove();
-			}, 400);
-		}).catch((err) => {
-			loadingText.innerText = "An execution setup layout error has occurred.";
-			loadingText.style.color = "#ff4a4a";
-			console.error(err);
-		});
-	</script>
+		}
+	}).then(() => {
+		loadingContainer.style.opacity = '0';
+		setTimeout(() => { loadingContainer.remove(); }, 400);
+	}).catch((err) => {
+		loadingText.innerText = "An execution setup layout error has occurred.";
+		loadingText.style.color = "#ff4a4a";
+		console.error(err);
+	});
+</script>
 </body>
 </html>
 
