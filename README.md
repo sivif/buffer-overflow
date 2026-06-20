@@ -45,7 +45,7 @@ If your penalty meter reaches **100%**, a severe core error triggers. The screen
 
 | Action | Keyboard Bindings | Gamepad / Controller |
 | :--- | :--- | :--- |
-| **Move ACES-chan** | `W, A, S, D` or `Arrow Keys` 
+| **Move ACES-chan** | `W, A, S, D` 
 | **Grab / Deposit Item** | `J` 
 | **Turbo Dash** | `K` | 
 
