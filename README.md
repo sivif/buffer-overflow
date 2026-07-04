@@ -56,4 +56,4 @@ If your penalty meter reaches **100%**, a severe core error triggers. The screen
 * **Architecture:** Decentralized event/signal pipeline utilizing a centralized `Global.gd` core manager script tracking scores, combo states, power-up timers, and match state variables.
 
 ---
-*Developed by [@sivif](https://github.com/sivif).*
+*Developed by [@sivif](https://github.com/sivif). for DLSL-ACES*
